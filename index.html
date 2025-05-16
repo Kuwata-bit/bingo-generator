@@ -10,10 +10,12 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 20px;
+            margin: 20px; /* 上下左右に少しマージン */
+            font-size: 16px; /* 基本フォントサイズ */
         }
         h1 {
             margin-bottom: 20px;
+            font-size: 1.8em; /* h1のサイズ調整 */
         }
         table {
             border-collapse: collapse;
@@ -22,39 +24,77 @@
         }
         th, td {
             border: 1px solid black;
-            width: 50px;
-            height: 50px;
+            width: calc( (100vw - 80px) / 5 ); /* スマホ幅考慮のセル幅 (最大50px) */
+            height: calc( (100vw - 80px) / 5 );/* スマホ幅考慮のセル高 (最大50px) */
+            max-width: 50px; /* PCでの最大セル幅 */
+            max-height: 50px;/* PCでの最大セル高 */
             text-align: center;
-            font-size: 18px;
+            font-size: 0.9em; /* セル内文字サイズ調整 */
             font-weight: bold;
+            box-sizing: border-box; /* paddingとborderをwidth/heightに含める */
         }
         th {
             background-color: #f0f0f0;
+            font-size: 1em;
         }
         td.free-spot {
             background-color: #e0e0e0;
-            font-size: 16px;
+            font-size: 0.8em; /* FREEマスの文字サイズ調整 */
         }
         button {
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 10px 15px; /* ボタンのパディング調整 */
+            font-size: 1em;
             cursor: pointer;
             background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
+            margin-top: 5px; /* ボタン間のマージン */
         }
         button:hover {
             background-color: #45a049;
         }
-        td.selected {
-            background-color: #ffb703; /* 例: オレンジ色 */
-            color: #2b2d42; /* 文字色を濃くする */
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
         }
-        td.selected.free-spot { /* FREEマスが選択された時のスタイル */
+        td.selected {
+            background-color: #ffb703;
+            color: #2b2d42;
+        }
+        td.selected.free-spot {
             background-color: #fb8500;
             color: white;
-        } /* ← CSSの閉じ括弧を修正済み */
+        }
+        input[type="password"] {
+            padding: 8px; /*入力欄のパディング */
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .admin-section { /* 運営用セクションのスタイル */
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px dashed #ccc;
+            background-color: #f9f9f9;
+            width: calc(100% - 40px); /* セクション幅調整 */
+            max-width: 400px; /* PCでの最大幅 */
+            box-sizing: border-box;
+        }
+        .admin-section h4 {
+            margin-top: 0;
+            font-size: 1.1em;
+        }
+        .admin-section p {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .admin-section label {
+            margin-right: 5px;
+            font-size: 0.9em;
+        }
+
     </style>
 </head>
 <body>
@@ -72,22 +112,31 @@
         <tbody>
             </tbody>
     </table>
-    <button id="generateButton">新しいカードを生成</button>
-    <div id="bingoMessage" style="display:none; font-size: 48px; font-weight: bold; color: red; text-align: center; margin-top: 20px;">ビンゴ！</div>
-<div style="margin-top: 30px; padding: 15px; border: 1px dashed #ccc; background-color: #f9f9f9;">
-        <h4>運営用リセット機能</h4>
-        <p style="font-size: 0.9em; color: #555;">以下のパスワードを入力して、現在のビンゴカードをリセットし、新しいカードを生成できます。(テスト用)</p>
-        <label for="adminPassword" style="margin-right: 5px;">パスワード:</label>
-        <input type="password" id="adminPassword" style="padding: 5px; margin-right: 10px;">
-        <button id="resetWithPasswordButton" style="padding: 5px 10px;">パスワードでリセット</button>
-    </div>
-    <script>
-      const MASTER_PASSWORD = "kosen2025"; // ★★★ここに好きなパスワードを設定してください★★★
 
-        const bingoCardTableBody = document.querySelector("#bingoCard tbody");  
-      const bingoCardTableBody = document.querySelector("#bingoCard tbody");
+    <button id="generateButton">新しいカードを生成</button>
+
+    <div id="bingoMessage" style="display:none; font-size: 2.5em; font-weight: bold; color: red; text-align: center; margin-top: 20px;">ビンゴ！</div>
+
+    <div class="admin-section">
+        <h4>運営用リセット機能</h4>
+        <p>以下のパスワードを入力して、現在のビンゴカードをリセットし、新しいカードを生成できます。(テスト用)</p>
+        <label for="adminPassword">パスワード:</label>
+        <input type="password" id="adminPassword">
+        <button id="resetWithPasswordButton">パスワードでリセット</button>
+    </div>
+
+    <script>
+        // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+        // ★ 運営用リセットパスワードを設定してください ★
+        // ★ (この下の行の "yourSecretPassword123" の部分) ★
+        const MASTER_PASSWORD = "yourSecretPassword123";
+        // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+
+        const bingoCardTableBody = document.querySelector("#bingoCard tbody");
         const generateButton = document.getElementById("generateButton");
         const bingoMessageElement = document.getElementById("bingoMessage");
+        const adminPasswordField = document.getElementById("adminPassword");
+        const resetWithPasswordButton = document.getElementById("resetWithPasswordButton");
 
         let cardState = []; // 各マスの選択状態 (true/false)
         let bingoAchieved = false; // ビンゴ達成フラグ
@@ -108,7 +157,7 @@
             bingoCardTableBody.innerHTML = ''; // カード表示部分をクリア
         }
 
-        // 指定範囲からユニークなランダム数を取得する関数 (変更なし)
+        // 指定範囲からユニークなランダム数を取得する関数
         function getRandomUniqueNumbers(min, max, count) {
             const numbers = [];
             while (numbers.length < count) {
@@ -120,7 +169,7 @@
             return numbers;
         }
 
-        // マスがクリックされたときの処理 (デバッグログは削除またはコメントアウトしてもOK)
+        // マスがクリックされたときの処理
         function handleCellClick(event) {
             // console.log("handleCellClickが呼ばれました！");
             // console.log("クリックされた要素:", event.target);
@@ -144,7 +193,7 @@
             checkBingo();
         }
 
-        // ビンゴ成立チェック (変更なし)
+        // ビンゴ成立チェック
         function checkBingo() {
             for (let i = 0; i < 5; i++) { // 横
                 if (cardState[i][0] && cardState[i][1] && cardState[i][2] && cardState[i][3] && cardState[i][4]) {
@@ -164,7 +213,7 @@
             }
         }
 
-        // ビンゴ成立表示 (変更なし)
+        // ビンゴ成立表示
         function announceBingo() {
             bingoAchieved = true;
             if (bingoMessageElement) {
@@ -216,47 +265,65 @@
 
             if (storedCardDataString) {
                 // セッションストレージにカードデータがあれば、それを復元して表示
-                console.log("保存されたビンゴカードを復元します。");
+                // console.log("保存されたビンゴカードを復元します。");
                 const cardData = JSON.parse(storedCardDataString);
                 displayCardOnTable(cardData);
-                generateButton.textContent = "カード確定済"; // ボタンのテキスト変更
-                generateButton.disabled = true; // ボタンを無効化
+                generateButton.textContent = "カード確定済";
+                generateButton.disabled = true;
             } else {
                 // なければ新しいカードを生成し、保存して表示
-                console.log("新しいビンゴカードを生成・保存します。");
+                // console.log("新しいビンゴカードを生成・保存します。");
                 const newCardData = {
                     B: getRandomUniqueNumbers(1, 15, 5),
                     I: getRandomUniqueNumbers(16, 30, 5),
-                    N_actual: getRandomUniqueNumbers(31, 45, 4), // N列は4つの数字を直接保存
+                    N_actual: getRandomUniqueNumbers(31, 45, 4),
                     G: getRandomUniqueNumbers(46, 60, 5),
                     O: getRandomUniqueNumbers(61, 75, 5)
                 };
                 sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newCardData));
                 displayCardOnTable(newCardData);
-                generateButton.textContent = "カード生成済 (再読み込みで固定)"; // ボタンのテキスト変更
-                generateButton.disabled = true; // 今回は生成後すぐに無効化
-                                                // もし「確定ボタン」にするなら、このボタンの役割を変える
+                generateButton.textContent = "カード生成済 (固定)";
+                generateButton.disabled = true;
             }
         }
 
-        // 「新しいカードを生成」ボタンのイベントリスナー
-        // このボタンは実質「リセットして最初からやり直す（開発用）」または削除も検討
-        // ここでは、セッションストレージをクリアして再生成する役割にするが、
-        // イベント中は使わせないようにする運用が望ましい。
+        // 「新しいカードを生成」ボタンのイベントリスナー (通常はdisabled)
         generateButton.addEventListener("click", () => {
-            if (confirm("本当に現在のカード情報をリセットして、新しいカードを生成しますか？\n（イベントの途中でこれを行うと、現在のカードは失われます）")) {
-                sessionStorage.removeItem(SESSION_STORAGE_KEY); // 保存データを削除
-                // window.location.reload(); // ページをリロードして再生成させるのが簡単
-                setupInitialCard(); // または、リロードせずに再セットアップ
-                // リロードしない場合、ボタンのdisabled状態などを適切に再設定する必要がある
-                generateButton.textContent = "カード生成済 (再読み込みで固定)";
-                generateButton.disabled = true;
-
-            }
+             if (confirm("（開発用）本当に現在のカード情報をリセットして、新しいカードを生成しますか？この操作は通常行いません。")) {
+                 sessionStorage.removeItem(SESSION_STORAGE_KEY);
+                 setupInitialCard();
+             }
         });
 
+        // 「パスワードでリセット」ボタンのイベントリスナー
+        if (resetWithPasswordButton && adminPasswordField) {
+            resetWithPasswordButton.addEventListener("click", () => {
+                const enteredPassword = adminPasswordField.value;
+                if (enteredPassword === "") {
+                    alert("パスワードを入力してください。");
+                    adminPasswordField.focus();
+                    return;
+                }
+
+                if (enteredPassword === MASTER_PASSWORD) {
+                    if (confirm("運営用パスワードが認証されました。\n本当に現在のカード情報をリセットして、新しいカードを生成しますか？")) {
+                        sessionStorage.removeItem(SESSION_STORAGE_KEY);
+                        setupInitialCard();
+                        alert("カードがリセットされ、新しいカードが生成されました。");
+                        adminPasswordField.value = "";
+                    }
+                } else {
+                    alert("パスワードが違います。");
+                    adminPasswordField.value = "";
+                    adminPasswordField.focus();
+                }
+            });
+        } else {
+            console.error("運営用リセットボタンまたはパスワードフィールドが見つかりません。");
+        }
+
         // ページ読み込み時に初期カードをセットアップ
-        setupInitialCard();  
+        setupInitialCard();
     </script>
 </body>
 </html>
