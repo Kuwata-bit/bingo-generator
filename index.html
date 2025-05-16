@@ -74,7 +74,13 @@
     </table>
     <button id="generateButton">新しいカードを生成</button>
     <div id="bingoMessage" style="display:none; font-size: 48px; font-weight: bold; color: red; text-align: center; margin-top: 20px;">ビンゴ！</div>
-
+<div style="margin-top: 30px; padding: 15px; border: 1px dashed #ccc; background-color: #f9f9f9;">
+        <h4>運営用リセット機能</h4>
+        <p style="font-size: 0.9em; color: #555;">以下のパスワードを入力して、現在のビンゴカードをリセットし、新しいカードを生成できます。(テスト用)</p>
+        <label for="adminPassword" style="margin-right: 5px;">パスワード:</label>
+        <input type="password" id="adminPassword" style="padding: 5px; margin-right: 10px;">
+        <button id="resetWithPasswordButton" style="padding: 5px 10px;">パスワードでリセット</button>
+    </div>
     <script>
       const bingoCardTableBody = document.querySelector("#bingoCard tbody");
         const generateButton = document.getElementById("generateButton");
