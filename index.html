@@ -51,9 +51,10 @@
             background-color: #ffb703; /* 例: オレンジ色 */
             color: #2b2d42; /* 文字色を濃くする */
         }
-        td.selected.free-spot { /* FREEマスが選択された時のスタイル (基本はselectedと同じで良いが、区別したい場合) */
+        td.selected.free-spot { /* FREEマスが選択された時のスタイル */
             background-color: #fb8500;
-            color: white;}/*
+            color: white;
+        } /* ← CSSの閉じ括弧を修正済み */
     </style>
 </head>
 <body>
@@ -72,30 +73,28 @@
             </tbody>
     </table>
     <button id="generateButton">新しいカードを生成</button>
-　　<div id="bingoMessage" style="display:none; font-size: 48px; font-weight: bold; color: red; text-align: center; margin-top: 20px;">ビンゴ！</div>
+    <div id="bingoMessage" style="display:none; font-size: 48px; font-weight: bold; color: red; text-align: center; margin-top: 20px;">ビンゴ！</div>
+
     <script>
-       const bingoCardTableBody = document.querySelector("#bingoCard tbody");
+        const bingoCardTableBody = document.querySelector("#bingoCard tbody");
         const generateButton = document.getElementById("generateButton");
-        const bingoMessageElement = document.getElementById("bingoMessage"); // HTMLに追加した要素を取得
+        const bingoMessageElement = document.getElementById("bingoMessage");
 
-        let cardState = []; // 5x5のカードの選択状態を保持 (true:選択済, false:未選択)
-        let bingoAchieved = false; // ビンゴが達成されたかどうかのフラグ
+        let cardState = [];
+        let bingoAchieved = false;
 
-        // カードの状態を初期化する関数
         function initializeCardState() {
             cardState = [];
             for (let i = 0; i < 5; i++) {
                 cardState[i] = [false, false, false, false, false];
             }
-            // 中央のFREEマスは最初から選択状態とする
-            cardState[2][2] = true;
-            bingoAchieved = false; // ビンゴ状態をリセット
+            cardState[2][2] = true; // FREEマスは最初から選択状態
+            bingoAchieved = false;
             if (bingoMessageElement) {
-                bingoMessageElement.style.display = 'none'; // 「ビンゴ！」メッセージを隠す
+                bingoMessageElement.style.display = 'none';
             }
         }
 
-        // 指定された範囲から指定された個数のランダムなユニークな数値を取得する関数 (変更なし)
         function getRandomUniqueNumbers(min, max, count) {
             const numbers = [];
             while (numbers.length < count) {
@@ -107,28 +106,33 @@
             return numbers;
         }
 
-        // マスがクリックされたときの処理
+        // マスがクリックされたときの処理 (デバッグログ追加版)
         function handleCellClick(event) {
-            if (bingoAchieved) return; // 既にビンゴが達成されていたら何もしない
-
+            console.log("handleCellClickが呼ばれました！"); // ★追加：関数が呼ばれたか確認
+            console.log("クリックされた要素:", event.target); // ★追加：どの要素がクリックされたか
             const cell = event.target;
-            // data属性から行と列のインデックスを取得
             const row = parseInt(cell.dataset.row);
             const col = parseInt(cell.dataset.col);
+            console.log("セル情報: row=" + row + ", col=" + col); // ★追加：行と列の情報
 
-            // FREEマス (2,2) はクリックで状態を変更しない (常に選択状態)
-            if (row === 2 && col === 2) {
+            if (bingoAchieved) {
+                console.log("既にビンゴ達成済みのため処理中断"); // ★追加
                 return;
             }
 
-            // 選択状態をトグルし、cardStateを更新
+            // FREEマス (2,2) はクリックで状態を変更しない (常に選択状態)
+            if (row === 2 && col === 2) {
+                console.log("FREEマスがクリックされました"); // ★追加
+                return;
+            }
+
             cell.classList.toggle('selected');
             cardState[row][col] = cell.classList.contains('selected');
+            console.log("選択状態変更後: cardState[" + row + "][" + col + "] = " + cardState[row][col]); // ★追加
 
-            checkBingo(); // ビンゴが成立したかチェック
+            checkBingo();
         }
 
-        // ビンゴが成立したかチェックする関数
         function checkBingo() {
             // 横ラインのチェック
             for (let i = 0; i < 5; i++) {
@@ -137,7 +141,6 @@
                     return;
                 }
             }
-
             // 縦ラインのチェック
             for (let j = 0; j < 5; j++) {
                 if (cardState[0][j] && cardState[1][j] && cardState[2][j] && cardState[3][j] && cardState[4][j]) {
@@ -145,13 +148,11 @@
                     return;
                 }
             }
-
             // 斜めラインのチェック (左上から右下)
             if (cardState[0][0] && cardState[1][1] && cardState[2][2] && cardState[3][3] && cardState[4][4]) {
                 announceBingo();
                 return;
             }
-
             // 斜めラインのチェック (右上から左下)
             if (cardState[0][4] && cardState[1][3] && cardState[2][2] && cardState[3][1] && cardState[4][0]) {
                 announceBingo();
@@ -159,67 +160,59 @@
             }
         }
 
-        // ビンゴ成立を知らせる関数
         function announceBingo() {
             bingoAchieved = true;
             if (bingoMessageElement) {
                 bingoMessageElement.style.display = 'block';
             }
-            // ここで、これ以上マスをクリックできないようにするなどの処理も追加可能
         }
 
-        // ビンゴカードを生成して表示する関数 (変更・追加あり)
         function generateBingoCard() {
-            bingoCardTableBody.innerHTML = ''; // tbody の中身をクリア
-            initializeCardState(); // カード状態を初期化
+            bingoCardTableBody.innerHTML = '';
+            initializeCardState();
 
             const cardNumbers = {
                 B: getRandomUniqueNumbers(1, 15, 5),
                 I: getRandomUniqueNumbers(16, 30, 5),
-                N: [], // N列は中央FREEのため別途処理するので空で初期化
+                N: [], // N列は別途処理
                 G: getRandomUniqueNumbers(46, 60, 5),
                 O: getRandomUniqueNumbers(61, 75, 5)
             };
-            // N列用の数字4つを準備
             const nColumnNumbers = getRandomUniqueNumbers(31, 45, 4);
 
-            // HTMLテーブルに行とセルを生成して挿入
-            for (let i = 0; i < 5; i++) { // 5行
+            for (let i = 0; i < 5; i++) {
                 const tr = document.createElement("tr");
-                for (let j = 0; j < 5; j++) { // 5列
+                for (let j = 0; j < 5; j++) {
                     const td = document.createElement("td");
-                    td.dataset.row = i; // data属性に行インデックスを保存
-                    td.dataset.col = j; // data属性に列インデックスを保存
+                    td.dataset.row = i;
+                    td.dataset.col = j;
 
-                    if (j === 2 && i === 2) { // 中央のマス (N列の3行目)
+                    if (j === 2 && i === 2) {
                         td.textContent = "FREE";
                         td.classList.add("free-spot");
-                        td.classList.add("selected"); // FREEマスは最初から選択状態
+                        td.classList.add("selected");
                     } else {
                         let num;
                         switch (j) {
                             case 0: num = cardNumbers.B[i]; break;
                             case 1: num = cardNumbers.I[i]; break;
                             case 2: // N列 (中央以外)
-                                if (i < 2) num = nColumnNumbers[i];       // 0,1番目の要素
-                                else if (i > 2) num = nColumnNumbers[i-1]; // 2,3番目の要素 (中央を飛ばすためインデックス調整)
+                                if (i < 2) num = nColumnNumbers[i];
+                                else if (i > 2) num = nColumnNumbers[i-1];
                                 break;
                             case 3: num = cardNumbers.G[i]; break;
                             case 4: num = cardNumbers.O[i]; break;
                         }
                         td.textContent = num;
                     }
-                    td.addEventListener('click', handleCellClick); // すべてのセルにクリックイベントを追加
+                    td.addEventListener('click', handleCellClick);
                     tr.appendChild(td);
                 }
                 bingoCardTableBody.appendChild(tr);
             }
         }
 
-        // ボタンのクリックイベントリスナー (変更なし)
         generateButton.addEventListener("click", generateBingoCard);
-
-        // 初期表示時にカードを1枚生成 (変更なし)
         generateBingoCard();
     </script>
 </body>
