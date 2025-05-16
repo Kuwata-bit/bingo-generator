@@ -24,14 +24,52 @@
         }
         th, td {
             border: 1px solid black;
-            width: calc( (100vw - 80px) / 5 ); /* スマホ幅考慮のセル幅 (最大50px) */
-            height: calc( (100vw - 80px) / 5 );/* スマホ幅考慮のセル高 (最大50px) */
-            max-width: 50px; /* PCでの最大セル幅 */
-            max-height: 50px;/* PCでの最大セル高 */
+            /* 画面幅から左右の余白(bodyマージン20px*2=40px)を引き、さらにテーブルの左右の余白(仮に10px*2=20px)を考慮 */
+            width: calc( (100vw - 60px) / 5 );
+            height: calc( (100vw - 60px) / 5 );
+            max-width: 60px;  /* スマホ表示でのセルの最大サイズ */
+            max-height: 60px; /* スマホ表示でのセルの最大サイズ */
             text-align: center;
-            font-size: 0.9em; /* セル内文字サイズ調整 */
+            font-size: 0.9em;
             font-weight: bold;
-            box-sizing: border-box; /* paddingとborderをwidth/heightに含める */
+            box-sizing: border-box;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            font-size: 1em; /* thの文字サイズはtdと合わせるか少し大きくても良い */
+        }
+
+        td.free-spot {
+            background-color: #e0e0e0;
+            font-size: 0.8em;
+        }
+
+        td.selected {
+            background-color: #ffb703;
+            color: #2b2d42;
+        }
+
+        td.selected.free-spot {
+            background-color: #fb8500;
+            color: white;
+        }
+
+        /* PCなどの広い画面向けのスタイル (例: 画面幅が600px以上の場合) */
+        @media (min-width: 600px) {
+            th, td {
+                width: 55px;  /* PCでは固定のセル幅 */
+                height: 55px; /* PCでは固定のセル高 */
+                font-size: 1em; /* PCでは少し文字を大きくしても良いかも */
+            }
+            td.free-spot {
+                font-size: 0.9em;
+            }
+            /* PCではテーブルが中央に来るように調整しても良いでしょう */
+            table#bingoCard {
+                margin-left: auto;
+                margin-right: auto;
+            }
         }
         th {
             background-color: #f0f0f0;
