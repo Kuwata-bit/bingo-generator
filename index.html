@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ビンゴカードジェネレーター</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid black;
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        th {
+            background-color: #f0f0f0;
+        }
+        td.free-spot {
+            background-color: #e0e0e0;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>ビンゴカード</h1>
+    <table id="bingoCard">
+        <thead>
+            <tr>
+                <th>B</th>
+                <th>I</th>
+                <th>N</th>
+                <th>G</th>
+                <th>O</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+    <button id="generateButton">新しいカードを生成</button>
+
+    <script>
+        const bingoCardTableBody = document.querySelector("#bingoCard tbody");
+        const generateButton = document.getElementById("generateButton");
+
+        // 指定された範囲から指定された個数のランダムなユニークな数値を取得する関数
+        function getRandomUniqueNumbers(min, max, count) {
+            const numbers = [];
+            while (numbers.length < count) {
+                const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+                if (!numbers.includes(randomNumber)) {
+                    numbers.push(randomNumber);
+                }
+            }
+            return numbers;
+        }
+
+        // ビンゴカードを生成して表示する関数
+        function generateBingoCard() {
+            // tbody の中身をクリア
+            bingoCardTableBody.innerHTML = '';
+
+            const cardNumbers = {
+                B: getRandomUniqueNumbers(1, 15, 5),
+                I: getRandomUniqueNumbers(16, 30, 5),
+                N: getRandomUniqueNumbers(31, 45, 5), // N列は中央がFREEなので5つ取得しておく
+                G: getRandomUniqueNumbers(46, 60, 5),
+                O: getRandomUniqueNumbers(61, 75, 5)
+            };
+
+            const displayOrder = ['B', 'I', 'N', 'G', 'O'];
+            const cardData = []; // 5x5のカードデータを格納する配列
+
+            // カードデータを構築
+            for (let i = 0; i < 5; i++) { // 行
+                const row = [];
+                for (let j = 0; j < 5; j++) { // 列
+                    const columnKey = displayOrder[j];
+                    if (j === 2 && i === 2) { // N列の中央
+                        row.push("FREE");
+                    } else if (j === 2) { // N列 (中央以外)
+                        // N列は4つの数字なので、取得した5つのうち中央行以外で使用する
+                        // 簡単のため、N列用に取得した数字から順番に使う（中央の分はスキップしない）
+                        // もしN列が4つで、中央フリー以外も4つにしたい場合は調整が必要
+                        row.push(cardNumbers[columnKey].pop()); // ここでは5つ取得しているので、popで使う
+                    }
+                    else {
+                        row.push(cardNumbers[columnKey][i]);
+                    }
+                }
+                cardData.push(row);
+            }
+            
+            // N列用の数字調整（中央がFREEなので、実際に表示するN列の数字は4つ）
+            // cardNumbers.Nのままだと5つなので、表示用に4つに絞るか、
+            // もしくは上記cardData構築時にN列の数字を適切に割り当てる
+            // 現在の実装ではN列用に5つ取得し、cardData作成時に pop() を使っているが、
+            // 中央がFREEになる行でN列の数字を消費しないようにする必要がある。
+            // よりシンプルなN列の数字の扱い：
+            const nColumnNumbers = getRandomUniqueNumbers(31, 45, 4);
+
+
+            // HTMLテーブルに行とセルを生成して挿入
+            for (let i = 0; i < 5; i++) { // 5行
+                const tr = document.createElement("tr");
+                for (let j = 0; j < 5; j++) { // 5列
+                    const td = document.createElement("td");
+                    if (j === 2 && i === 2) { // 中央のマス (N列の3行目)
+                        td.textContent = "FREE";
+                        td.classList.add("free-spot");
+                    } else {
+                        let num;
+                        switch (j) {
+                            case 0: num = cardNumbers.B[i]; break;
+                            case 1: num = cardNumbers.I[i]; break;
+                            case 2: // N列 (中央以外)
+                                // N列は4つの数字。i=0,1 が前半2つ、i=3,4が後半2つ
+                                if (i < 2) num = nColumnNumbers[i];
+                                else if (i > 2) num = nColumnNumbers[i-1]; // インデックス調整
+                                break;
+                            case 3: num = cardNumbers.G[i]; break;
+                            case 4: num = cardNumbers.O[i]; break;
+                        }
+                        td.textContent = num;
+                    }
+                    tr.appendChild(td);
+                }
+                bingoCardTableBody.appendChild(tr);
+            }
+        }
+
+        // ボタンのクリックイベントリスナー
+        generateButton.addEventListener("click", generateBingoCard);
+
+        // 初期表示時にカードを1枚生成
+        generateBingoCard();
+    </script>
+</body>
+</html>
