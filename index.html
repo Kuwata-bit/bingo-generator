@@ -71,6 +71,8 @@
             margin-right: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            box-sizing: border-box; /* Firefox等での表示崩れ防止 */
+            max-width: 150px; /* パスワード入力欄の最大幅 */
         }
         .admin-section { /* 運営用セクションのスタイル */
             margin-top: 30px;
@@ -129,7 +131,7 @@
         // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
         // ★ 運営用リセットパスワードを設定してください ★
         // ★ (この下の行の "yourSecretPassword123" の部分) ★
-        const MASTER_PASSWORD = "1105";
+        const MASTER_PASSWORD = "yourSecretPassword123";
         // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 
         const bingoCardTableBody = document.querySelector("#bingoCard tbody");
@@ -268,8 +270,10 @@
                 // console.log("保存されたビンゴカードを復元します。");
                 const cardData = JSON.parse(storedCardDataString);
                 displayCardOnTable(cardData);
-                generateButton.textContent = "カード確定済";
-                generateButton.disabled = true;
+                if (generateButton) { // generateButtonが存在する場合のみ操作
+                    generateButton.textContent = "カード確定済";
+                    generateButton.disabled = true;
+                }
             } else {
                 // なければ新しいカードを生成し、保存して表示
                 // console.log("新しいビンゴカードを生成・保存します。");
@@ -282,18 +286,23 @@
                 };
                 sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newCardData));
                 displayCardOnTable(newCardData);
-                generateButton.textContent = "カード生成済 (固定)";
-                generateButton.disabled = true;
+                if (generateButton) { // generateButtonが存在する場合のみ操作
+                    generateButton.textContent = "カード生成済 (固定)";
+                    generateButton.disabled = true;
+                }
             }
         }
 
         // 「新しいカードを生成」ボタンのイベントリスナー (通常はdisabled)
-        generateButton.addEventListener("click", () => {
-             if (confirm("（開発用）本当に現在のカード情報をリセットして、新しいカードを生成しますか？この操作は通常行いません。")) {
-                 sessionStorage.removeItem(SESSION_STORAGE_KEY);
-                 setupInitialCard();
-             }
-        });
+        if (generateButton) { // generateButtonが存在する場合のみリスナー設定
+            generateButton.addEventListener("click", () => {
+                 if (confirm("（開発用）本当に現在のカード情報をリセットして、新しいカードを生成しますか？この操作は通常行いません。")) {
+                     sessionStorage.removeItem(SESSION_STORAGE_KEY);
+                     setupInitialCard();
+                 }
+            });
+        }
+
 
         // 「パスワードでリセット」ボタンのイベントリスナー
         if (resetWithPasswordButton && adminPasswordField) {
@@ -308,7 +317,7 @@
                 if (enteredPassword === MASTER_PASSWORD) {
                     if (confirm("運営用パスワードが認証されました。\n本当に現在のカード情報をリセットして、新しいカードを生成しますか？")) {
                         sessionStorage.removeItem(SESSION_STORAGE_KEY);
-                        setupInitialCard();
+                        setupInitialCard(); // 新しいカードを生成し、ボタンの状態も更新する
                         alert("カードがリセットされ、新しいカードが生成されました。");
                         adminPasswordField.value = "";
                     }
@@ -319,7 +328,7 @@
                 }
             });
         } else {
-            console.error("運営用リセットボタンまたはパスワードフィールドが見つかりません。");
+            // console.error("運営用リセットボタンまたはパスワードフィールドのHTML要素が見つかりません。IDを確認してください。");
         }
 
         // ページ読み込み時に初期カードをセットアップ
